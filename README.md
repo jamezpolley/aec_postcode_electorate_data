@@ -18,5 +18,7 @@ A mapping of Australian postcodes to federal electorates according to the Austra
 
 Pull requests welcome.
 
+Note that the scraper adds to the database so if for any reason a postcode is removed then there will be an old record that doesn't get updated. To fix this simply
+delete the database before a run.
 
 This is a scraper that runs on [Morph](https://morph.io). To get started [see the documentation](https://morph.io/documentation)
