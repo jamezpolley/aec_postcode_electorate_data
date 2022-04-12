@@ -24,10 +24,8 @@ def scrape_postcode(postcode):
             if row.attrs == {}:
                 tds = row.find_all('td')
                 rowdata = {'state': tds[0].text, 'suburb': tds[1].text, 'postcode': tds[2].text, 'electorate': tds[3].text, 'redistributed': tds[4].text, 'other': tds[5].text}
-                print(rowdata)
                 scraperwiki.sqlite.save(unique_keys=('state', 'suburb', 'postcode', 'electorate'), data=rowdata, table_name='data')
 
-        print(len(rows))
         if len(rows) < 22:
             return
 
