@@ -26,7 +26,6 @@ for postcode in postcodes:
     url = str.format(urltemplate, postcode)
 
     page = requests.get(url).content
-    print(page)
     bs4 = BeautifulSoup(page, "html.parser")
 
     rows = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities').find_all('tr')
