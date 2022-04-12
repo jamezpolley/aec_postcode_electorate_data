@@ -17,7 +17,12 @@ def scrape_postcode(postcode):
     while True:
         bs4 = BeautifulSoup(page, "html.parser")
 
-        rows = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities').find_all('tr', recursive=False)
+        table = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities')
+        # Occasionally (e.g. postcode "2250") a page will have exactly 20 items on it but no next page
+        # So if this happens just bail out
+        if table is None:
+            return
+        rows = table.find_all('tr', recursive=False)
 
         for row in rows:
             # Skip header and footer of table because they're making tables like it's the 2000s
