@@ -29,6 +29,10 @@ for postcode in postcodes:
     bs4 = BeautifulSoup(page, "html.parser")
 
     rows = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities').find_all('tr')
+    if len(rows) == 20:
+        # These postcodes probably will have extra pages
+        print("WARNING: Maximum number of rows reached on postcode {}".format(postcode))
+
     for row in rows:
         tds = row.find_all('td')
         if len(tds) == 6:
