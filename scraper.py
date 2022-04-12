@@ -11,7 +11,9 @@ import scraperwiki
 # Oh lordy. The AEC website appears to be blocking morph.io.
 # Use our proxy if the MORPH_AUSTRALIAN_PROXY environment variable is set
 if "MORPH_AUSTRALIAN_PROXY" in os.environ:
+    print("Using proxy setting in MORPH_AUSTRALIAN_PROXY...")
     os.environ['HTTP_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
+    os.environ['HTTPS_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
 
 urltemplate = "https://electorate.aec.gov.au/LocalitySearchResults.aspx?filter={}&filterby=Postcode"
 postcodes = open("postcodes", "r").readlines()
