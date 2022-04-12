@@ -11,19 +11,36 @@ import scraperwiki
 def scrape_postcode(postcode):
     urltemplate = "https://electorate.aec.gov.au/LocalitySearchResults.aspx?filter={}&filterby=Postcode"
     url = str.format(urltemplate, postcode)
+    pageno = 1
     page = requests.get(url).content
-    bs4 = BeautifulSoup(page, "html.parser")
 
-    rows = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities').find_all('tr')
-    if len(rows) >= 21:
-        # These postcodes probably will have extra pages
-        print("WARNING: Maximum number of rows reached on postcode {}".format(postcode))
+    while True:
+        bs4 = BeautifulSoup(page, "html.parser")
 
-    for row in rows:
-        tds = row.find_all('td')
-        if len(tds) == 6:
-            rowdata = {'state': tds[0].text, 'suburb': tds[1].text, 'postcode': tds[2].text, 'electorate': tds[3].text, 'redistributed': tds[4].text, 'other': tds[5].text}
-            scraperwiki.sqlite.save(unique_keys=('state', 'suburb', 'postcode', 'electorate'), data=rowdata, table_name='data')
+        rows = bs4.find(id='ContentPlaceHolderBody_gridViewLocalities').find_all('tr')
+
+        for row in rows:
+            tds = row.find_all('td')
+            if len(tds) == 6:
+                rowdata = {'state': tds[0].text, 'suburb': tds[1].text, 'postcode': tds[2].text, 'electorate': tds[3].text, 'redistributed': tds[4].text, 'other': tds[5].text}
+                print(rowdata)
+                scraperwiki.sqlite.save(unique_keys=('state', 'suburb', 'postcode', 'electorate'), data=rowdata, table_name='data')
+
+        if len(rows) < 21:
+            return
+
+        pageno += 1
+
+        # Get the next page using the ASP.net postback
+        data = {
+            "__EVENTTARGET": "ctl00$ContentPlaceHolderBody$gridViewLocalities",
+            "__EVENTARGUMENT": "Page${}".format(pageno),
+        	"__VIEWSTATEENCRYPTED": "",
+            "__VIEWSTATE": bs4.find(id="__VIEWSTATE")["value"],
+            "__VIEWSTATEGENERATOR": bs4.find(id="__VIEWSTATEGENERATOR")["value"],
+            "__EVENTVALIDATION": bs4.find(id="__EVENTVALIDATION")["value"],
+        }
+        page = requests.post(url, data=data).content
 
 # Oh lordy. The AEC website appears to be blocking morph.io.
 # Use our proxy if the MORPH_AUSTRALIAN_PROXY environment variable is set
