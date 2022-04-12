@@ -8,6 +8,10 @@ from bs4 import BeautifulSoup
 os.environ['SCRAPERWIKI_DATABASE_NAME'] = 'sqlite:///data.sqlite'
 import scraperwiki
 
+# Oh lordy. The AEC website appears to be blocking morph.io.
+# Use our proxy if the MORPH_AUSTRALIAN_PROXY environment variable is set
+if "MORPH_AUSTRALIAN_PROXY" in os.environ:
+    os.environ['HTTP_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
 
 urltemplate = "https://electorate.aec.gov.au/LocalitySearchResults.aspx?filter={}&filterby=Postcode"
 postcodes = open("postcodes", "r").readlines()
