@@ -8,23 +8,9 @@ from bs4 import BeautifulSoup
 os.environ['SCRAPERWIKI_DATABASE_NAME'] = 'sqlite:///data.sqlite'
 import scraperwiki
 
-# Oh lordy. The AEC website appears to be blocking morph.io.
-# Use our proxy if the MORPH_AUSTRALIAN_PROXY environment variable is set
-if "MORPH_AUSTRALIAN_PROXY" in os.environ:
-    print("Using proxy setting in MORPH_AUSTRALIAN_PROXY...")
-    os.environ['HTTP_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
-    os.environ['HTTPS_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
-
-urltemplate = "https://electorate.aec.gov.au/LocalitySearchResults.aspx?filter={}&filterby=Postcode"
-postcodes = open("postcodes", "r").readlines()
-total_codes = len(postcodes)
-i = 0
-for postcode in postcodes:
-    i+=1
-    postcode = postcode.strip()
-    print("{}: {}/{}".format(postcode, i, total_codes))
+def scrape_postcode(postcode):
+    urltemplate = "https://electorate.aec.gov.au/LocalitySearchResults.aspx?filter={}&filterby=Postcode"
     url = str.format(urltemplate, postcode)
-
     page = requests.get(url).content
     bs4 = BeautifulSoup(page, "html.parser")
 
@@ -38,3 +24,19 @@ for postcode in postcodes:
         if len(tds) == 6:
             rowdata = {'state': tds[0].text, 'suburb': tds[1].text, 'postcode': tds[2].text, 'electorate': tds[3].text, 'redistributed': tds[4].text, 'other': tds[5].text}
             scraperwiki.sqlite.save(unique_keys=('state', 'suburb', 'postcode', 'electorate'), data=rowdata, table_name='data')
+
+# Oh lordy. The AEC website appears to be blocking morph.io.
+# Use our proxy if the MORPH_AUSTRALIAN_PROXY environment variable is set
+if "MORPH_AUSTRALIAN_PROXY" in os.environ:
+    print("Using proxy setting in MORPH_AUSTRALIAN_PROXY...")
+    os.environ['HTTP_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
+    os.environ['HTTPS_PROXY'] = os.environ['MORPH_AUSTRALIAN_PROXY']
+
+postcodes = open("postcodes", "r").readlines()
+total_codes = len(postcodes)
+i = 0
+for postcode in postcodes:
+    i+=1
+    postcode = postcode.strip()
+    print("{}: {}/{}".format(postcode, i, total_codes))
+    scrape_postcode(postcode)
